@@ -1,0 +1,7 @@
+# OpenWrt SDKs and build artifacts (recreated by `just sdk-download` / `just package-build`)
+sdks/
+dist/
+build/
+*.apk
+*.o
+src/fritz-guestd

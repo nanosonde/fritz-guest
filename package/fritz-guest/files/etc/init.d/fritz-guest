@@ -1,0 +1,52 @@
+#!/bin/sh /etc/rc.common
+# SPDX-License-Identifier: GPL-2.0-or-later
+# fritz-guest: FRITZ!Box guest network extension daemon
+
+START=95
+STOP=10
+USE_PROCD=1
+PROG=/usr/sbin/fritz-guestd
+
+# Graceful stop delivers StopCCN reliably: 1+2+4+8+8... seconds for retry_max retries.
+term_timeout() {
+	local retry_max total=0 step=1 i=0
+
+	config_load fritz-guest
+	config_get retry_max guest retry_max 5
+	case "$retry_max" in
+		''|*[!0-9]*) retry_max=5 ;;
+	esac
+	[ "$retry_max" -gt 10 ] && retry_max=10
+	while [ "$i" -le "$retry_max" ]; do
+		total=$((total + step))
+		step=$((step * 2))
+		[ "$step" -gt 8 ] && step=8
+		i=$((i + 1))
+	done
+	total=$((total + 9))
+	[ "$total" -lt 40 ] && total=40
+	echo "$total"
+}
+
+start_service() {
+	procd_open_instance
+	procd_set_param command "$PROG"
+	procd_set_param respawn 3600 5 5
+	procd_set_param term_timeout "$(term_timeout)"
+	procd_close_instance
+}
+
+# The daemon validates the new configuration before applying it.
+reload_service() {
+	start
+	procd_send_signal fritz-guest '*' HUP
+}
+
+service_triggers() {
+	local uplink
+
+	procd_add_reload_trigger fritz-guest network
+	config_load fritz-guest
+	config_get uplink guest uplink lan
+	procd_add_reload_interface_trigger "$uplink"
+}

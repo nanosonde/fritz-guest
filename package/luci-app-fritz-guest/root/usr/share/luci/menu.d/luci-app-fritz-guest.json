@@ -1,0 +1,14 @@
+{
+  "admin/services/fritz-guest": {
+    "title": "FRITZ! Guest Network",
+    "order": 70,
+    "action": {
+      "type": "view",
+      "path": "fritz-guest/overview"
+    },
+    "depends": {
+      "acl": ["luci-app-fritz-guest"],
+      "uci": {"fritz-guest": true}
+    }
+  }
+}

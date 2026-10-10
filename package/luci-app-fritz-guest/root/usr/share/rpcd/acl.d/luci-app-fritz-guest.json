@@ -1,0 +1,17 @@
+{
+  "luci-app-fritz-guest": {
+    "description": "Configure FRITZ! guest connectivity and read tunnel status",
+    "read": {
+      "ubus": {
+        "fritz-guest": ["status"],
+        "luci-rpc": ["getNetworkDevices", "getWirelessDevices"],
+        "network.interface": ["dump"],
+        "network.device": ["status"]
+      },
+      "uci": ["fritz-guest", "network"]
+    },
+    "write": {
+      "uci": ["fritz-guest"]
+    }
+  }
+}
